@@ -1,0 +1,93 @@
+--- TRANSFER TABLE CONT START CONT FINAL ,MONEDA START MONEDA FINAL,PERSON ID,USER ID ON DELETE DO NOTHING
+--- RAUL-EUR => ANDREI-RON
+
+DELETE FROM users WHERE id=22; -- DELETES ALSO THE ACCOUNTS
+delete from account where user_id=24;
+delete from account where person_id=14;
+delete from person where ID IN ('5','6');
+delete from users where ID IN ('25','26');
+
+delete from person  where ID=14;
+
+SELECT full_name, account.balance , account.currency
+FROM account INNER JOIN person p on p.id = account.person_id;
+
+update account
+set blocked=true
+where user_id='24';
+
+select*from account inner join users  on account.user_id = users.id
+inner join person  on person.id = account.person_id
+where users.id=24;
+
+update person
+set id=3
+where id='13';
+
+SELECT * FROM account ORDER BY account_id ASC;
+
+select* from saving_account where user_id =4 and currency='USD';
+
+delete from saving_account where user_id=4;
+
+select distinct users.id from users
+inner join account  on users.id = account.user_id
+inner join person on person.id = account.person_id where person.id=1;
+
+select saving_account.currency from saving_account
+where saving_account.person_id = 1;
+
+update account
+set blocked=false
+where person_id=1;
+
+update saving_account
+set blocked=true
+where person_id=1;
+
+
+update users
+set username=1
+where username='AnaPaul12';
+
+update account
+set balance = 878787
+where user_id=4 and currency='RON';
+
+update saving_account
+set savings_balance = 1111
+where user_id=4 and currency='EUR';
+
+delete from person where id not in (1,2);
+
+update account set balance=0 where user_id= 4;
+
+SELECT user_id_start,user_id_end,amount,currency_from,currency_with,currency_to,transfer_timestamp
+from past_transfers where (user_id_start = 4 or user_id_end=4) and  (currency_from ='USD' OR currency_to='USD') order by transfer_timestamp desc;
+
+update  saving_account
+set payment_frequency='daily' where savings_balance=0;
+
+delete from saving_account where person_id=2 and currency='USD' or currency='EUR';
+
+SELECT blocked,savings_balance, currency, interest_rate,last_added_interest_rate FROM saving_account;
+
+UPDATE saving_account SET savings_balance = 100000000  where user_id = 4 AND currency = 'RON';
+
+update person set full_name='Ana Paul' where id=1;
+
+insert into friends (id_friend1, id_friend2) values
+(4,6),
+(6,4);
+
+select distinct
+b.username,pers.full_name
+from users a inner join friends  on a.id = friends.id_friend1 inner join users b on friends.id_friend2=b.id --- bridgeable get person 2
+inner join account acc on user_id = id_friend2 --- get person 2 , from account
+inner join person pers on pers.id=acc.person_id
+where friends.id_friend1=4;
+
+select distinct
+b.username
+from users a inner join friends  on a.id = friends.id_friend1 inner join users b on friends.id_friend2=b.id
+where friends.id_friend1=4;

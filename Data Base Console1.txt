@@ -1,0 +1,95 @@
+CREATE TABLE users (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    password VARCHAR(50) NOT NULL,
+    type VARCHAR(10) NOT NULL ,
+     constraint user_check_constr CHECK(type IN ('CUSTOMER', 'ADMIN'))
+);
+
+CREATE TABLE country(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(50) UNIQUE NOT NULL
+);
+
+CREATE TABLE person (
+    id SERIAL PRIMARY KEY,
+    full_name VARCHAR(100) NOT NULL UNIQUE,
+    address VARCHAR(300) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    fiscal_residence_id INTEGER NOT NULL,
+    FOREIGN KEY (fiscal_residence_id) REFERENCES country(id)
+);
+
+ALTER TABLE person ADD COLUMN gen varchar(10);
+ALTER TABLE person ALTER COLUMN gen SET NOT NULL;
+
+ALTER TABLE person ADD CONSTRAINT unique_email UNIQUE (email);
+ALTER TABLE person ADD CONSTRAINT unique_phone UNIQUE (phone);
+
+CREATE TYPE ISO AS ENUM ('RON', 'EUR', 'USD');
+
+CREATE TABLE account (
+    account_id VARCHAR(50) PRIMARY KEY,
+    blocked BOOLEAN NOT NULL DEFAULT FALSE,
+    balance  BIGINT DEFAULT 0,
+    currency ISO not null ,
+    iban VARCHAR(34) UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NOT NULL,
+    person_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+CREATE TABLE saving_account (
+    account_id VARCHAR(50) NOT NULL,
+    blocked BOOLEAN NOT NULL DEFAULT FALSE,
+    savings_balance BIGINT DEFAULT 0,
+    currency ISO NOT NULL,
+    iban VARCHAR(34) UNIQUE NOT NULL,
+    interest_rate DECIMAL(5, 2) NOT NULL,  -- Annual interest rate
+    payment_frequency VARCHAR(10) NOT NULL,  -- Daily, Weekly, Monthly, Yearly
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NOT NULL,
+    person_id INT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (person_id) REFERENCES person(id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT positive_savings_balance_constr CHECK (savings_balance >= 0),
+    CONSTRAINT valid_frequency CHECK (payment_frequency IN ('daily', 'weekly', 'monthly', 'yearly'))
+);
+
+ALTER TABLE account add constraint positive_balance_constr check(balance>=0);
+ALTER TABLE person ALTER COLUMN email TYPE VARCHAR(35);
+ALTER TABLE person ALTER COLUMN address TYPE VARCHAR(100);
+ALTER TABLE person ALTER COLUMN phone TYPE VARCHAR(35);
+ALTER TABLE person ALTER COLUMN full_name TYPE VARCHAR(65);
+ALTER TABLE users ALTER COLUMN password TYPE VARCHAR(35);
+ALTER TABLE users ALTER COLUMN username TYPE VARCHAR(35);
+ALTER TABLE saving_account ALTER COLUMN interest_rate TYPE DECIMAL(3, 2);
+ALTER TABLE saving_account ADD CONSTRAINT check_interest_rate CHECK (interest_rate >= 1.00 AND interest_rate <= 5.00);
+ALTER TABLE saving_account add column last_added_interest_rate TIMESTAMP default now();
+
+CREATE TABLE past_transfers (
+    transfer_id SERIAL PRIMARY KEY,
+    user_id_start INT,
+    user_id_end INT,
+    amount BIGINT NOT NULL,
+    currency_from ISO NOT NULL,
+    currency_with ISO NOT NULL,
+    currency_to ISO NOT NULL,
+    transfer_timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id_start) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (user_id_end) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
+);
+
+CREATE TABLE Friends(
+    id serial primary key ,
+    id_friend1 integer not null,
+    id_friend2 integer not null,
+    foreign key (id_friend1) references users(id) on delete set null on update cascade ,
+    foreign key(id_friend2) references users(id) on delete set null on update cascade
+);
+

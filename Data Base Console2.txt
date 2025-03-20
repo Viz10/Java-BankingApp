@@ -1,0 +1,20 @@
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS
+$$
+BEGIN
+NEW.updated_at = NOW(); -- update the time
+RETURN NEW; --- new refers to the new row that is being inserted or updated
+END;
+$$
+LANGUAGE plpgsql;
+
+CREATE TRIGGER update_account_updated_at
+BEFORE UPDATE ON account
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_saving_account_updated_at
+BEFORE UPDATE ON saving_account
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
